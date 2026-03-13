@@ -1208,13 +1208,17 @@
             const input = demoInput.value.trim();
             if (!input) return;
 
+            // Sanitize user input to prevent XSS
+            const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            const safeInput = esc(input);
+
             demoMsgCount++;
             const persona = demoPersona.value;
             const icon = personaIcons[persona];
             const name = personaNames[persona];
             const response = getResponse(persona, input);
 
-            demoOutput.innerHTML += `<br><span class="prompt">you > </span><span class="cmd">${input}</span><br>`;
+            demoOutput.innerHTML += `<br><span class="prompt">you > </span><span class="cmd">${safeInput}</span><br>`;
 
             if (demoMsgCount <= 2) {
                 // First 2 messages: show truncated teaser (first 60% of response)
