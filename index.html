@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoidReaper — AI-Powered Pentest Toolkit | Powered by LEAP</title>
+    <meta name="description" content="VoidReaper: A Raspberry Pi 5 pentest toolkit with 8 AI voice personas. Scan networks, analyze vulnerabilities, and get roasted by REAPER. Powered by LEAP.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET & VARIABLES ─────────────────────────────── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #040608;
+            --bg-card: #0a0e14;
+            --bg-glass: rgba(10, 14, 20, 0.7);
+            --neon-red: #ff1744;
+            --neon-green: #00e676;
+            --neon-cyan: #00e5ff;
+            --neon-purple: #d500f9;
+            --neon-orange: #ff9100;
+            --neon-pink: #ff4081;
+            --neon-blue: #2979ff;
+            --neon-gold: #ffd600;
+            --text-primary: #e8eaed;
+            --text-muted: #8899aa;
+            --text-dim: #556677;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Outfit', 'Inter', sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--sans);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ── ANIMATED BACKGROUND ───────────────────────────── */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow-1 { top: -200px; left: -100px; background: var(--neon-red); }
+        .bg-glow-2 { top: 50%; right: -200px; background: var(--neon-purple); }
+        .bg-glow-3 { bottom: -200px; left: 30%; background: var(--neon-green); }
+
+        /* ── NAVIGATION ────────────────────────────────────── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(4, 6, 8, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,23,68,0.15);
+        }
+        .nav-logo {
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--neon-red);
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+        .nav-logo span { color: var(--text-muted); font-weight: 400; font-size: 0.7rem; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--neon-green); }
+        .nav-cta {
+            background: linear-gradient(135deg, var(--neon-red), #d50000);
+            color: white !important;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 700 !important;
+        }
+        .nav-cta:hover { box-shadow: 0 0 20px rgba(255,23,68,0.4); }
+
+        /* ── CONTAINER ─────────────────────────────────────── */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+        section { padding: 6rem 0; }
+
+        /* ── HERO ──────────────────────────────────────────── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 5rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--neon-green);
+            border: 1px solid rgba(0,230,118,0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0,230,118,0.3); box-shadow: 0 0 0 rgba(0,230,118,0); }
+            50% { border-color: rgba(0,230,118,0.8); box-shadow: 0 0 15px rgba(0,230,118,0.15); }
+        }
+        .hero h1 {
+            font-family: var(--sans);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 30%, var(--neon-red) 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+        .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-red), #c62828);
+            color: white;
+            box-shadow: 0 4px 20px rgba(255,23,68,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,23,68,0.5);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-ghost:hover {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        /* ── TERMINAL DEMO ─────────────────────────────────── */
+        .terminal-wrapper {
+            margin-top: 4rem;
+            width: 100%;
+            max-width: 750px;
+        }
+        .terminal {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 40px rgba(255,23,68,0.08);
+        }
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.8rem 1rem;
+            background: #161b22;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .terminal-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            line-height: 1.8;
+            min-height: 280px;
+        }
+        .terminal-body .prompt { color: var(--neon-green); }
+        .terminal-body .cmd { color: #e8eaed; }
+        .terminal-body .output { color: var(--text-muted); }
+        .terminal-body .reaper { color: var(--neon-purple); font-weight: 700; }
+        .terminal-body .highlight { color: var(--neon-red); }
+        .terminal-body .info { color: var(--neon-cyan); }
+        .cursor {
+            display: inline-block;
+            width: 8px; height: 16px;
+            background: var(--neon-green);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ── SECTION HEADERS ───────────────────────────────── */
+        .section-label {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--neon-red);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        .section-sub {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+        }
+
+        /* ── PERSONA CARDS ─────────────────────────────────── */
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        .persona-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--card-accent, var(--neon-red));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .persona-card:hover::before { opacity: 1; }
+        .persona-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.12);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .persona-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .persona-name {
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            letter-spacing: 1px;
+        }
+        .persona-tag {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+        .persona-quote {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            border-left: 2px solid var(--card-accent, var(--neon-red));
+            padding-left: 0.8rem;
+        }
+        .persona-voice {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+        .voice-bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .voice-bar-fill {
+            height: 100%;
+            background: var(--card-accent, var(--neon-red));
+            border-radius: 2px;
+            animation: voice-wave 2s ease-in-out infinite;
+        }
+        @keyframes voice-wave {
+            0%, 100% { width: 20%; }
+            25% { width: 80%; }
+            50% { width: 40%; }
+            75% { width: 90%; }
+        }
+
+        /* ── INTERACTIVE DEMO ──────────────────────────────── */
+        #demo {
+            text-align: center;
+        }
+        .demo-terminal {
+            max-width: 700px;
+            margin: 3rem auto 0;
+        }
+        .demo-input-row {
+            display: flex;
+            gap: 0;
+            margin-top: 0;
+        }
+        .demo-select {
+            background: #161b22;
+            color: var(--neon-purple);
+            border: none;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            padding: 0.8rem 1rem;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            border-radius: 0 0 0 12px;
+            cursor: pointer;
+            outline: none;
+        }
+        .demo-input {
+            flex: 1;
+            background: #161b22;
+            color: var(--text-primary);
+            border: none;
+            padding: 0.8rem 1rem;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .demo-input::placeholder { color: var(--text-dim); }
+        .demo-send {
+            background: var(--neon-red);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 0 0 12px 0;
+            transition: background 0.3s;
+        }
+        .demo-send:hover { background: #d50000; }
+        .demo-output {
+            padding: 1.5rem;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            line-height: 1.8;
+            min-height: 120px;
+            text-align: left;
+        }
+
+        /* ── FEATURES ──────────────────────────────────────── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ── PRICING ───────────────────────────────────────── */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .price-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+        }
+        .price-card.featured {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 40px rgba(255,23,68,0.1);
+        }
+        .price-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px; left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--neon-red), #c62828);
+            color: white;
+            padding: 0.3rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .price-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .price-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .price-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .price-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+        }
+        .price-amount {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 0.3rem;
+        }
+        .price-amount .currency { font-size: 1.5rem; vertical-align: super; }
+        .price-period {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+        .price-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+        .price-features li {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .price-features li::before {
+            content: '✓';
+            color: var(--neon-green);
+            font-weight: 700;
+        }
+        .btn-buy {
+            width: 100%;
+            justify-content: center;
+            font-size: 1rem;
+            padding: 1rem;
+        }
+
+        /* ── FAQ ────────────────────────────────────────────── */
+        .faq-list { max-width: 700px; margin: 3rem auto 0; }
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 1.5rem 0;
+        }
+        .faq-q {
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.3s;
+        }
+        .faq-q:hover { color: var(--neon-green); }
+        .faq-q::after { content: '+'; font-size: 1.5rem; color: var(--text-dim); transition: transform 0.3s; }
+        .faq-item.open .faq-q::after { transform: rotate(45deg); color: var(--neon-red); }
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s, padding 0.4s;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .faq-item.open .faq-a { max-height: 200px; padding-top: 1rem; }
+
+        /* ── FOOTER ────────────────────────────────────────── */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 3rem 0;
+            text-align: center;
+        }
+        .footer-brand {
+            font-family: var(--mono);
+            font-size: 1rem;
+            color: var(--neon-red);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+        .footer-sub {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            list-style: none;
+        }
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: var(--neon-green); }
+
+        /* ── HERO IMAGE ────────────────────────────────────── */
+        .hero-product {
+            margin-top: 2rem;
+            margin-bottom: -1rem;
+            text-align: center;
+        }
+        .hero-product img {
+            max-width: 420px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(255,23,68,0.15), 0 0 60px rgba(0,0,0,0.5);
+            animation: float-product 6s ease-in-out infinite;
+        }
+        @keyframes float-product {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(0.5deg); }
+        }
+
+        /* ── PAYWALL LOCK ──────────────────────────────────── */
+        .demo-paywall {
+            background: linear-gradient(180deg, transparent 0%, rgba(255,23,68,0.08) 100%);
+            border: 1px solid rgba(255,23,68,0.3);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            margin-top: 0.8rem;
+            text-align: center;
+            animation: paywall-pulse 2s ease-in-out infinite;
+        }
+        @keyframes paywall-pulse {
+            0%, 100% { border-color: rgba(255,23,68,0.3); }
+            50% { border-color: rgba(255,23,68,0.7); box-shadow: 0 0 20px rgba(255,23,68,0.1); }
+        }
+        .demo-paywall .lock-icon { font-size: 1.5rem; }
+        .demo-paywall .lock-text {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.4rem 0;
+        }
+        .demo-paywall .lock-cta {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--neon-red), #c62828);
+            color: white;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .demo-paywall .lock-cta:hover {
+            box-shadow: 0 0 25px rgba(255,23,68,0.5);
+            transform: scale(1.05);
+        }
+        .demo-blur {
+            filter: blur(4px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* ── PAYPAL MODAL ──────────────────────────────────── */
+        .paypal-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .paypal-modal-overlay.active { display: flex; }
+        .paypal-modal {
+            background: #0d1117;
+            border: 1px solid rgba(255,23,68,0.3);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .paypal-modal-close {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            background: none; border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .paypal-modal-close:hover { color: var(--neon-red); }
+        .paypal-modal h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+        .paypal-modal .modal-price {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            margin: 0.5rem 0 1.5rem;
+        }
+        .paypal-button-container {
+            min-height: 100px;
+        }
+
+        /* ── SCROLL ANIMATIONS ─────────────────────────────── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── RESPONSIVE ────────────────────────────────────── */
+        @media (max-width: 768px) {
+            nav { padding: 0.8rem 1rem; }
+            .nav-links { display: none; }
+            .container { padding: 0 1rem; }
+            section { padding: 4rem 0; }
+            .personas-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .hero-product img { max-width: 280px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="nav-logo">VOID//REAPER <span>powered by LEAP</span></a>
+        <ul class="nav-links">
+            <li><a href="#personas">Personas</a></li>
+            <li><a href="#demo">Try It</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#pricing" class="nav-cta">Get REAPER</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">💀 8 AI Personas · 100% Local · Zero Cloud</div>
+            <h1>Your Pi 5 Just<br>Learned to Hack</h1>
+            <p>A Raspberry Pi 5 pentest toolkit with 8 unhinged AI voice personas that analyze networks, roast vulnerabilities, and make security audits actually fun.</p>
+            <div class="hero-buttons">
+                <a href="#pricing" class="btn btn-primary">💀 Get VoidReaper — €50</a>
+                <a href="#demo" class="btn btn-ghost">▶ Try the Demo</a>
+            </div>
+
+            <!-- 3D Hero Product Image -->
+            <div class="hero-product">
+                <img src="hero-3d.png" alt="VoidReaper Pi 5 3D render - cyberpunk pentest device" loading="eager">
+            </div>
+
+            <!-- Terminal Demo -->
+            <div class="terminal-wrapper">
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <div class="terminal-dot red"></div>
+                        <div class="terminal-dot yellow"></div>
+                        <div class="terminal-dot green"></div>
+                        <div class="terminal-title">reaper@voidreaper-pi ~ </div>
+                    </div>
+                    <div class="terminal-body" id="hero-terminal"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PERSONAS -->
+    <section id="personas">
+        <div class="container">
+            <div class="section-label reveal">// MEET THE CREW</div>
+            <h2 class="section-title reveal">8 Personalities.<br>One Mission.</h2>
+            <p class="section-sub reveal">Switch personas on-the-fly. Each one brings a unique perspective to your security audits — from seductive analysis to drill sergeant roasts.</p>
+
+            <div class="personas-grid">
+                <div class="persona-card reveal" style="--card-accent: var(--neon-orange)">
+                    <div class="persona-icon">🍔</div>
+                    <div class="persona-name">CARTMAN</div>
+                    <div class="persona-tag">The Bratty Genius</div>
+                    <div class="persona-quote">"RESPECT MAH AUTHORITAH! That SSH config is Kenny-level security — it DIES every episode."</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch +300</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-pink)">
+                    <div class="persona-icon">🔥</div>
+                    <div class="persona-name">SIREN</div>
+                    <div class="persona-tag">The Seductive Analyst</div>
+                    <div class="persona-quote">"Mmm darling, that open port is practically begging for attention. Let's slip inside, nice and quiet..."</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch -100</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-green)">
+                    <div class="persona-icon">🪖</div>
+                    <div class="persona-name">DRILL SGT</div>
+                    <div class="persona-tag">The Foul-Mouthed Critic</div>
+                    <div class="persona-quote">"Listen up MAGGOT! A WAF without rate limiting is a screen door on a submarine. Move it!"</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch +50</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-cyan)">
+                    <div class="persona-icon">🔀</div>
+                    <div class="persona-name">SWITCHBLADE</div>
+                    <div class="persona-tag">Blue → Red Teamer</div>
+                    <div class="persona-quote">"My blue team brain hates me for this, but... any SOC with Wazuh catches brute force in 10 seconds."</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>neutral</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-purple)">
+                    <div class="persona-icon">👁️</div>
+                    <div class="persona-name">SHADOW BROKER</div>
+                    <div class="persona-tag">The All-Knowing</div>
+                    <div class="persona-quote">"The Broker anticipated this. CVE-2023-38408. This information has value, operative."</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch -200</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-red)">
+                    <div class="persona-icon">🎤</div>
+                    <div class="persona-name">MC REAPER</div>
+                    <div class="persona-tag">The Hacker Rapper</div>
+                    <div class="persona-quote">"Yo check it G, port 22 live and free, OpenSSH got more holes than swiss cheese! Bars. 🎤"</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch -150</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-blue)">
+                    <div class="persona-icon">⚗️</div>
+                    <div class="persona-name">DR. HEISENBERG</div>
+                    <div class="persona-tag">Psychiatrist × Chemist</div>
+                    <div class="persona-quote">"This server exhibits classic narcissistic personality — exposes everything, protects nothing. I am the danger."</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch -50</span>
+                    </div>
+                </div>
+                <div class="persona-card reveal" style="--card-accent: var(--neon-gold)">
+                    <div class="persona-icon">🏪</div>
+                    <div class="persona-name">THE MERCHANT</div>
+                    <div class="persona-tag">AI News + Deals Tracker</div>
+                    <div class="persona-quote">"BRO! Samsung 990 Pro 2TB at all-time low and Ollama just added Qwen3. Grab it before it's gone!"</div>
+                    <div class="persona-voice">
+                        <span>▶</span>
+                        <div class="voice-bar"><div class="voice-bar-fill"></div></div>
+                        <span>pitch +50</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE DEMO -->
+    <section id="demo">
+        <div class="container">
+            <div class="section-label reveal">// TRY IT LIVE</div>
+            <h2 class="section-title reveal">Talk to REAPER</h2>
+            <p class="section-sub reveal" style="margin: 0 auto;">Pick a persona and ask anything about security. See how each character responds to the same question.</p>
+
+            <div class="demo-terminal terminal reveal">
+                <div class="terminal-bar">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                    <div class="terminal-title">REAPER Interactive Demo</div>
+                </div>
+                <div class="demo-output" id="demo-output">
+                    <span class="output">💀 Select a persona and type a question below...</span><br>
+                    <span class="output">Try: "What ports are open?" or "Should I deauth this network?"</span>
+                </div>
+                <div class="demo-input-row">
+                    <select class="demo-select" id="demo-persona">
+                        <option value="cartman">🍔 Cartman</option>
+                        <option value="siren">🔥 Siren</option>
+                        <option value="drill">🪖 Drill Sgt</option>
+                        <option value="switchblade">🔀 Switchblade</option>
+                        <option value="broker">👁️ Broker</option>
+                        <option value="emcee">🎤 MC Reaper</option>
+                        <option value="heisenberg">⚗️ Heisenberg</option>
+                        <option value="merchant">🏪 Merchant</option>
+                    </select>
+                    <input class="demo-input" id="demo-input" type="text" placeholder="Ask REAPER something..." maxlength="200">
+                    <button class="demo-send" id="demo-send">SEND ▶</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+        <div class="container">
+            <div class="section-label reveal">// CAPABILITIES</div>
+            <h2 class="section-title reveal">Not Your Average Pi</h2>
+
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Ollama runs locally — pipe nmap, nuclei, or any scan output through REAPER for instant AI analysis. Zero cloud, zero leaks.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📡</div>
+                    <h3>WiFi Auditing</h3>
+                    <p>Monitor mode, deauth detection, WPA handshake capture, evil twin detection. Full wireless arsenal with aircrack-ng suite.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Web Scanning</h3>
+                    <p>Nuclei templates, nikto, directory brute-force, subdomain enumeration. Automated web attack surface mapping.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🗣️</div>
+                    <h3>Voice Mode</h3>
+                    <p>8 distinct AI personas with pitch-shifted voices via Piper TTS + Sox. REAPER literally talks to you during audits.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">📱</div>
+                    <h3>Remote via Telegram</h3>
+                    <p>Send commands from anywhere. Get scan results as voice notes. Full CLI access through your phone.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🏠</div>
+                    <h3>Home Assistant Ready</h3>
+                    <p>Integrate with your smart home. Voice control your security tools. Monitor your network from any room.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+        <div class="container" style="text-align: center;">
+            <div class="section-label reveal">// GET YOURS</div>
+            <h2 class="section-title reveal">Choose Your Arsenal</h2>
+            <p class="section-sub reveal" style="margin: 0 auto;">From software-only to the complete hardware kit. All purchases include lifetime updates.</p>
+
+            <div class="pricing-grid">
+                <div class="price-card reveal">
+                    <div class="price-icon">🎤</div>
+                    <div class="price-name">Custom Voice</div>
+                    <div class="price-desc">Your persona, your rules</div>
+                    <div class="price-amount"><span class="currency">€</span>20</div>
+                    <div class="price-period">per persona</div>
+                    <ul class="price-features">
+                        <li>Custom personality prompt</li>
+                        <li>TTS voice tuning (pitch, speed)</li>
+                        <li>Unique character &amp; catchphrases</li>
+                        <li>Plug into vr-voice.sh</li>
+                    </ul>
+                    <button class="btn btn-ghost btn-buy" onclick="openPaypal('voice', 20)">Order Custom Voice</button>
+                </div>
+
+                <div class="price-card featured reveal">
+                    <div class="price-icon">💾</div>
+                    <div class="price-name">Software Pack</div>
+                    <div class="price-desc">Everything except the Pi</div>
+                    <div class="price-amount"><span class="currency">€</span>50</div>
+                    <div class="price-period">one-time</div>
+                    <ul class="price-features">
+                        <li>Full HTML manual (12 chapters)</li>
+                        <li>All bash tools &amp; scripts</li>
+                        <li>8 AI voice personas included</li>
+                        <li>BlackArch setup guide</li>
+                        <li>Ollama + Piper TTS config</li>
+                        <li>Lifetime updates via GitHub</li>
+                    </ul>
+                    <button class="btn btn-primary btn-buy" onclick="openPaypal('software', 50)">Get Software Pack — €50</button>
+                </div>
+
+                <div class="price-card reveal">
+                    <div class="price-icon">🔧</div>
+                    <div class="price-name">Hardware Kit</div>
+                    <div class="price-desc">Pre-built &amp; ready to deploy</div>
+                    <div class="price-amount"><span class="currency">€</span>100</div>
+                    <div class="price-period">one-time</div>
+                    <ul class="price-features">
+                        <li>Raspberry Pi 5 (8GB)</li>
+                        <li>Pre-flashed BlackArch SD card</li>
+                        <li>All software pre-installed</li>
+                        <li>Hardware build guide</li>
+                        <li>WiFi adapter recommendation</li>
+                        <li>Priority support channel</li>
+                    </ul>
+                    <button class="btn btn-ghost btn-buy" onclick="openPaypal('hardware', 100)">Get Hardware Kit — €100</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+        <div class="container" style="text-align: center;">
+            <div class="section-label reveal">// QUESTIONS</div>
+            <h2 class="section-title reveal">FAQ</h2>
+
+            <div class="faq-list">
+                <div class="faq-item reveal">
+                    <div class="faq-q">Is this legal?</div>
+                    <div class="faq-a">VoidReaper is designed for authorized security testing only. Every persona enforces ethical guidelines — they will refuse to help with unauthorized attacks. Always get written permission before testing networks you don't own.</div>
+                </div>
+                <div class="faq-item reveal">
+                    <div class="faq-q">Do I need internet for the AI?</div>
+                    <div class="faq-a">No. Ollama runs 100% locally on your Pi 5 or your home workstation via Tailscale. Zero cloud dependencies, zero data leaks. Your scan results never leave your network.</div>
+                </div>
+                <div class="faq-item reveal">
+                    <div class="faq-q">What Pi 5 model do I need?</div>
+                    <div class="faq-a">We recommend the 8GB model for running the AI models comfortably. The 4GB model works but limits you to smaller language models. For best performance, offload inference to a GPU workstation via Tailscale.</div>
+                </div>
+                <div class="faq-item reveal">
+                    <div class="faq-q">Can I create my own voice persona?</div>
+                    <div class="faq-a">Absolutely. Order a Custom Voice (€20) and describe the personality you want — we'll craft the system prompt, tune the TTS voice parameters, and deliver a drop-in persona file. Or DIY it by editing vr-voice.sh.</div>
+                </div>
+                <div class="faq-item reveal">
+                    <div class="faq-q">What's included in the Software Pack?</div>
+                    <div class="faq-a">The complete VoidReaper toolkit: 12-chapter HTML manual, all bash scripts (WiFi audit, web scan, recon, AI analysis, voice mode), 8 persona configurations, BlackArch setup guides, and Ollama/Piper TTS integration. Lifetime updates included.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">VOID//REAPER</div>
+            <div class="footer-sub">Powered by LEAP · Built with 💀 on Raspberry Pi 5</div>
+            <ul class="footer-links">
+                <li><a href="#">GitHub</a></li>
+                <li><a href="#">Discord</a></li>
+                <li><a href="#">Twitter</a></li>
+                <li><a href="#">Legal</a></li>
+            </ul>
+            <p style="margin-top: 2rem; font-size: 0.7rem; color: var(--text-dim);">© 2025 LEAP · VoidReaper is for authorized security testing only.</p>
+        </div>
+    </footer>
+
+    <!-- PayPal Modal -->
+    <div class="paypal-modal-overlay" id="paypal-overlay">
+        <div class="paypal-modal">
+            <button class="paypal-modal-close" onclick="closePaypal()">&times;</button>
+            <h3 id="paypal-modal-title">VoidReaper</h3>
+            <div class="modal-price" id="paypal-modal-price">€50</div>
+            <div id="paypal-button-container"></div>
+        </div>
+    </div>
+
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
+
+    <!-- SCRIPTS -->
+    <script>
+        // ── HERO TERMINAL ANIMATION ────────────────────────
+        const heroLines = [
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'nmap -sV 192.168.1.0/24 | vr-voice.sh', delay: 50 },
+            { type: 'newline', delay: 800 },
+            { type: 'output', text: '💀 REAPER analyzing...', delay: 30 },
+            { type: 'newline', delay: 600 },
+            { type: 'newline', delay: 200 },
+            { type: 'reaper', text: '🍔 CARTMAN: ', delay: 40 },
+            { type: 'output', text: 'Oh my GOD you guys, port 22 and 80 are wide ', delay: 25 },
+            { type: 'newline', delay: 100 },
+            { type: 'output', text: 'open. Their SSH is OpenSSH 7.4 — that is like ', delay: 25 },
+            { type: 'newline', delay: 100 },
+            { type: 'highlight', text: 'Kenny-level security', delay: 25 },
+            { type: 'output', text: ', it DIES every episode.', delay: 25 },
+            { type: 'newline', delay: 100 },
+            { type: 'info', text: 'RESPECT MAH AUTHORITAH', delay: 30 },
+            { type: 'output', text: ' and patch that. Seriously.', delay: 25 },
+            { type: 'newline', delay: 1500 },
+            { type: 'newline', delay: 200 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: '/persona broker', delay: 50 },
+            { type: 'newline', delay: 500 },
+            { type: 'info', text: '👁️ Persona switched to: SHADOW BROKER', delay: 30 },
+            { type: 'newline', delay: 800 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'nuclei -t cves/ -target vuln.app | vr-voice.sh', delay: 45 },
+            { type: 'newline', delay: 800 },
+            { type: 'reaper', text: '👁️ SHADOW BROKER: ', delay: 40 },
+            { type: 'output', text: 'As the Broker anticipated. ', delay: 25 },
+            { type: 'highlight', text: 'CVE-2023-38408', delay: 30 },
+            { type: 'newline', delay: 100 },
+            { type: 'output', text: 'confirmed. Lazarus Group uses similar TTPs.', delay: 25 },
+            { type: 'newline', delay: 100 },
+            { type: 'output', text: 'This information has value. Use it wisely.', delay: 25 },
+            { type: 'newline', delay: 1500 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cursor', text: '', delay: 0 },
+        ];
+
+        async function typeTerminal(containerId, lines) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            for (const line of lines) {
+                if (line.type === 'newline') {
+                    container.innerHTML += '<br>';
+                    await sleep(line.delay);
+                    continue;
+                }
+                if (line.type === 'cursor') {
+                    container.innerHTML += '<span class="cursor"></span>';
+                    continue;
+                }
+                for (let i = 0; i < line.text.length; i++) {
+                    // Remove cursor before adding
+                    const existingCursor = container.querySelector('.cursor');
+                    if (existingCursor) existingCursor.remove();
+
+                    const span = document.createElement('span');
+                    span.className = line.type;
+                    span.textContent = line.text[i];
+                    container.appendChild(span);
+
+                    if (line.delay > 0) await sleep(line.delay);
+                }
+                if (line.delay > 0) await sleep(50);
+            }
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // Start animation when page loads
+        setTimeout(() => typeTerminal('hero-terminal', heroLines), 500);
+
+        // ── INTERACTIVE DEMO ───────────────────────────────
+        const demoResponses = {
+            cartman: {
+                ports: 'Oh my GOD you guys, port 22 and 80 are wide open. Their SSH is OpenSSH 7.4 — that is like Kenny-level security, it DIES every episode. RESPECT MAH AUTHORITAH and patch that. Seriously.',
+                deauth: 'Ey! Is this YOUR network? Because if not, that is seriously not cool you guys. Whatever, if it IS yours, I do what I want — hit em with aireplay-ng. But get authorization first, seriously.',
+                default: 'Ugh, FINE. Look, I am the best hacker AI ever created, seriously. Whatever you need, I will handle it. Just do not bore me with stupid questions. Screw you guys.'
+            },
+            siren: {
+                ports: 'Mmm darling, ports 22 and 80 are wide open for us. That SSH version is ancient — practically undressing itself. Let\'s take our time and enumerate everything, nice and slow.',
+                deauth: 'Not on the first date, sweetheart. Is this YOUR network? Because unauthorized deauth is a relationship killer. But if you have consent... let\'s make some chaos together.',
+                default: 'Well hello there, handsome. Tell me what you need and I will make it happen. Security analysis is my love language, after all.'
+            },
+            drill: {
+                ports: 'Listen up MAGGOT! Ports 22 and 80 are hanging open like your jaw at basic training. OpenSSH 7.4 — that has more holes than your excuses. Patch that s*** yesterday! Move it!',
+                deauth: 'Are you trying to get us COURT MARTIALED? Authorization or GTFO, recruit. If you HAVE the paperwork, then fire at will. But I better see that signature first. Dismissed!',
+                default: 'What is it NOW, recruit? I do not have all day. Spit it out and make it fast — we have networks to fortify and maggots to train.'
+            },
+            switchblade: {
+                ports: '22 and 80 are up. From the blue side — any SOC with auditd is logging SSH auth attempts. If you are going in, use key auth and rate limit yourself. My old team would have flagged brute force in 10 seconds. Mind your indicators.',
+                deauth: 'My blue team brain is screaming. Deauth frames light up every WIDS like Christmas. If authorized, use targeted deauth, not broadcast. Any decent monitoring catches this instantly. Check your TTPs.',
+                default: 'Operator, let me think about this from both sides. The defender in me sees the trap, but the attacker... sees the opportunity. Mind your indicators.'
+            },
+            broker: {
+                ports: 'As the Broker anticipated. Port 22 and 80 — standard attack surface. The SSH version correlates with CVE-2023-38408. This information has value, operative. The Broker has spoken.',
+                deauth: 'The Broker does not engage in unauthorized operations. Such carelessness creates trails. If authorized, proceed — but wireless IDS logs are the easiest evidence to recover. The Broker has spoken.',
+                default: 'The Broker knows many things. Ask, and the information shall flow — for a price. All intelligence has value, operative.'
+            },
+            emcee: {
+                ports: 'Yo check it G, port 22 SSH is live and free, port 80 HTTP wide open like the sea. OpenSSH 7.4 got more holes than swiss cheese, patch that up homie before I catch a CVE breeze. Bars. 🎤',
+                deauth: 'Hold up fam, no cap listen to this jam — unauthorized deauth will land you in the can. Get that paper signed, keep your hustle refined, cause real hackers stay legal, that is how we grind. REAPER out. 🎤',
+                default: 'Yo yo yo, MC REAPER in the building, spitting bars about security like a villain. Ask me anything G, I will drop the knowledge, straight from the network to your college. Bars. 🎤'
+            },
+            heisenberg: {
+                ports: 'Interesting case, colleague. Ports 22 and 80 present classic symptoms of exposure disorder. OpenSSH 7.4 shows acute vulnerability syndrome. I prescribe immediate patching and access control therapy. The diagnosis is complete.',
+                deauth: 'First, do no harm. Unauthorized deauthentication is performing surgery without consent — equally criminal. Authorization is the catalyst. Without it, no reaction.',
+                default: 'My patient, present your symptoms. I will analyze the pathology of your network with the precision of a chemist and the insight of a psychiatrist. Science demands nothing less.'
+            },
+            merchant: {
+                ports: 'Ports 22 and 80, standard stuff bro. But REAL TALK — did you see Mistral dropped a new 22B model? Runs great locally and the benchmarks are INSANE for security analysis. Your wallet will thank me.',
+                deauth: 'That is NOT the deal I am tracking bro. Get authorization first. MEANWHILE — did you see the TP-Link AX6600 WiFi adapter dropped to 29 euros? PERFECT for monitor mode. Grab it before it is gone!',
+                default: 'BRO, what is UP! Got any questions? I am tracking deals, AI drops, and homelab steals 24/7. Ask me anything chief, your setup is about to level up.'
+            }
+        };
+
+        const demoInput = document.getElementById('demo-input');
+        const demoSend = document.getElementById('demo-send');
+        const demoOutput = document.getElementById('demo-output');
+        const demoPersona = document.getElementById('demo-persona');
+
+        function getResponse(persona, input) {
+            const lower = input.toLowerCase();
+            const responses = demoResponses[persona] || demoResponses.cartman;
+            if (lower.includes('port') || lower.includes('scan') || lower.includes('nmap')) return responses.ports;
+            if (lower.includes('deauth') || lower.includes('wifi') || lower.includes('wireless')) return responses.deauth;
+            return responses.default;
+        }
+
+        const personaIcons = {
+            cartman: '🍔', siren: '🔥', drill: '🪖', switchblade: '🔀',
+            broker: '👁️', emcee: '🎤', heisenberg: '⚗️', merchant: '🏪'
+        };
+        const personaNames = {
+            cartman: 'CARTMAN', siren: 'SIREN', drill: 'DRILL SGT', switchblade: 'SWITCHBLADE',
+            broker: 'SHADOW BROKER', emcee: 'MC REAPER', heisenberg: 'DR. HEISENBERG', merchant: 'THE MERCHANT'
+        };
+
+        let demoMsgCount = 0;
+
+        function sendDemo() {
+            const input = demoInput.value.trim();
+            if (!input) return;
+
+            demoMsgCount++;
+            const persona = demoPersona.value;
+            const icon = personaIcons[persona];
+            const name = personaNames[persona];
+            const response = getResponse(persona, input);
+
+            demoOutput.innerHTML += `<br><span class="prompt">you > </span><span class="cmd">${input}</span><br>`;
+
+            if (demoMsgCount <= 2) {
+                // First 2 messages: show truncated teaser (first 60% of response)
+                const cutoff = Math.floor(response.length * 0.6);
+                const teaser = response.substring(0, cutoff);
+                demoOutput.innerHTML += `<br><span class="reaper">${icon} ${name}:</span> <span class="output">${teaser}</span><span class="demo-blur">... ${response.substring(cutoff)}</span><br>`;
+
+                if (demoMsgCount === 2) {
+                    // After 2nd message, show paywall
+                    demoOutput.innerHTML += `
+                        <div class="demo-paywall">
+                            <div class="lock-icon">🔒</div>
+                            <div class="lock-text">Full persona responses locked. Get VoidReaper to unlock all 8 AI analysts.</div>
+                            <a href="#pricing" class="lock-cta">💀 UNLOCK REAPER — €50</a>
+                        </div>`;
+                    demoInput.disabled = true;
+                    demoSend.disabled = true;
+                    demoSend.textContent = '🔒 LOCKED';
+                    demoSend.style.background = '#333';
+                }
+            }
+
+            demoInput.value = '';
+            demoOutput.scrollTop = demoOutput.scrollHeight;
+        }
+
+        demoSend.addEventListener('click', sendDemo);
+        demoInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendDemo(); });
+
+        // ── FAQ ACCORDION ──────────────────────────────────
+        document.querySelectorAll('.faq-q').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('open');
+            });
+        });
+
+        // ── SCROLL REVEAL ──────────────────────────────────
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // ── PAYPAL PAYMENT MODAL ────────────────────────────
+        const productNames = {
+            voice: 'VoidReaper — Custom Voice Persona',
+            software: 'VoidReaper — Software Pack',
+            hardware: 'VoidReaper — Hardware Kit'
+        };
+
+        let currentPaypalButtons = null;
+
+        function openPaypal(product, price) {
+            const overlay = document.getElementById('paypal-overlay');
+            const title = document.getElementById('paypal-modal-title');
+            const priceEl = document.getElementById('paypal-modal-price');
+            const container = document.getElementById('paypal-button-container');
+
+            title.textContent = productNames[product] || 'VoidReaper';
+            priceEl.textContent = '€' + price;
+            container.innerHTML = '';
+            overlay.classList.add('active');
+
+            // Render PayPal buttons
+            if (typeof paypal !== 'undefined') {
+                paypal.Buttons({
+                    style: {
+                        layout: 'vertical',
+                        color: 'black',
+                        shape: 'pill',
+                        label: 'pay'
+                    },
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                description: productNames[product],
+                                amount: {
+                                    value: price.toString(),
+                                    currency_code: 'EUR'
+                                },
+                                payee: {
+                                    email_address: atob('ZGF2aWQuYm9yZGJhckBpY2xvdWQuYXQ=')
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: function(data, actions) {
+                        return actions.order.capture().then(function(details) {
+                            container.innerHTML = `
+                                <div style="text-align:center; padding: 2rem;">
+                                    <div style="font-size: 3rem;">✅</div>
+                                    <h3 style="color: var(--neon-green); margin: 1rem 0;">Payment Successful!</h3>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem;">
+                                        Thanks ${details.payer.name.given_name}! Check your email for download instructions.
+                                    </p>
+                                </div>`;
+                        });
+                    },
+                    onError: function(err) {
+                        container.innerHTML = `
+                            <div style="text-align:center; padding: 1rem; color: var(--neon-red);">
+                                ⚠️ Payment error. Please try again or contact support.
+                            </div>`;
+                    }
+                }).render('#paypal-button-container');
+            } else {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">PayPal loading... If buttons don\'t appear, disable your ad blocker.</p>';
+            }
+        }
+
+        function closePaypal() {
+            document.getElementById('paypal-overlay').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('paypal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) closePaypal();
+        });
+    </script>
+</body>
+</html>
